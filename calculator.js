@@ -10,32 +10,81 @@ let current_operator = "";
 let operand1 = "";
 let operand2 = "";
 
-function appendToDisplay(value) {
+function evaluate() {
+
+    //Parse operands to numbers
+    let result = 0;
+    let firstOperand = parseFloat(operand1);
+    let secondOperand = parseFloat(operand2);
+
+    //Only evaluate if both operands have been entered
+    if (operand2 != "") {
+        console.log("Attempting to evaluate: " + firstOperand + " " + current_operator + " " + secondOperand);
+        switch (current_operator) {
+            case "+":
+                result = firstOperand + secondOperand;
+                break;
+            case "-":
+                result = firstOperand - secondOperand;
+                break;
+            case "*":
+                result = firstOperand * secondOperand;
+                break;
+            case "/":
+                result = firstOperand / secondOperand;
+                break;
+            case "%":
+                result = firstOperand % secondOperand;
+                break;
+            default:
+                console.log("Invalid operator: " + current_operator);
+                break;
+        }
+
+        //Display result
+        displayValue(result, true);
+        clearExpression();
+    }
+}
+
+function displayValue(value, displayResult = false) {
     
     //The first number entered should replace the 0
     if (output.length == 1 && output == "0") {
         output = "";
     }
 
-    if (output.length <= 13) {
-        if (operator_selected == false) {
-            operand1 += value;
-            display.innerText = operand1;
-        } else {
-            operand2 += value;
-            display.innerText = operand2;
+    //If a result is to be displayed, display result but do not assign number to operands.
+    if (displayResult) {
+        //Set character limit to 13
+        if (value.length > 13) {
+            value = value.substring(0, 13);
         }
+        display.innerText = value;
+        console.log("Result displayed: " + value);
+    } else {
+        if (output.length <= 13) {
+            //If an operator is not selected, store number as first operand
+            if (operator_selected == false) {
+                operand1 += value;
+                display.innerText = operand1;
+            } else {
+                operand2 += value;
+                display.innerText = operand2;
+            }
+        }
+        console.log("First operand: " + operand1);
+        console.log("Operator: " + current_operator);
+        console.log("Second operand: " + operand2);   
     }
-
-    console.log("First operand: " + operand1);
-    console.log("Second operand: " + operand2);
-    console.log("Operator selected: " + operator_selected);
-    console.log("Current operator: " + current_operator);
 }
 
 function clearDisplay() {
     output = "0";
     display.innerText = output;
+}
+
+function clearExpression() {
     operator_selected = false;
     operand1 = "";
     operand2 = "";
@@ -43,9 +92,8 @@ function clearDisplay() {
 }
 
 function selectOperator(value) {
-    
-    //If operator is not selected...
-    if (operator_selected == false) {
+    //Select an operator only if an operator is not already selected and first operand has been entered
+    if (operator_selected == false && operand1 != "") {
         operator_selected = true;
         switch (value) {
             case "add":
@@ -71,7 +119,7 @@ function selectOperator(value) {
 
 for (const button of number_buttons) {
     button.addEventListener("click", () => {
-        appendToDisplay(button.id);
+        displayValue(button.id);
     });
 }
 
@@ -80,8 +128,13 @@ for (const button of action_buttons) {
         case "clear":
             button.addEventListener("click", () => {
                 clearDisplay();
+                clearExpression();
             });
             break;
+        case "equals":
+            button.addEventListener("click", () => {
+                evaluate();
+            })
         default:
             break;
     }
